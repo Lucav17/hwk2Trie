@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" />
+    <link href="style.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+
+    <section id="search">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        <input type="search" class="form-control" id="searchInput" list="h" autocomplete="off">
+                        <datalist id="h">
+                        </datalist>
+                        <span class="input-group-btn">
+                            <button id="sbSearch" class="btn btn-default hover-button" type="button">Search</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="search-result">
+        
+    </section> 
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script>
+        $('document').ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "getQuerySuggestions.asmx/downloadWiki",
+                data: "{}",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    console.log("success");
+                },
+                error: function (msg) {
+                    console.log("failure");
+                }
+
+            });
+        });
+
+        $("#searchInput").unbind();
+        $("#searchInput").bind().keyup(function (event) {
+            var search = $("#searchInput").val();
+            var obj = { input: search };
+            console.log(search);
+            $.ajax({
+                type: "POST",
+                url: "getQuerySuggestions.asmx/searchTrie",
+                data: JSON.stringify(obj),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    console.log(msg);
+                    var arr = msg.d;
+                    arr = arr.replace("[", "");
+                    arr = arr.replace("]", "");
+                    arr = arr.replace(/"/g, "");
+                    arr = arr.replace(/\$/g, "");
+                    arr = arr.replace(/\^/g, "");
+                    var data = arr.split(",");
+                    console.log(data)
+                    
+                    var addHTML = "";
+
+                    if (data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i]) {
+                                addHTML += "<option value='" + data[i] + "'>" + data[1] + "</option>";
+                            }
+                        }
+                        $("#h").html(addHTML);
+                    } else {
+                        $("#search-result").html("<p>No results found</p>");
+                    }
+                    
+                   
+                },
+                error: function (msg) {
+                    console.log(msg);
+                    console.log("fail");
+                    console.log(search);
+                }
+
+            });
+        });
+
+        $("#sbSearch").click(function (event) {
+            var input = $("#searchInput").val();
+            var link = "https://en.wikipedia.org/wiki/" + input;
+            var tag = "<a href='" + link + "'target='blank'>visit your search result here</a>";
+            $("#search-result").html(tag);
+        });
+    </script>
+
+</body>
+</html>

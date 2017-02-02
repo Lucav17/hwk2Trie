@@ -1,0 +1,15 @@
+﻿body {
+}
+
+#search {
+    padding:40px 20px;
+}
+
+
+input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+#search-result {
+    padding:20px 30%;
+}
